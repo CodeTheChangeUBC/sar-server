@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+
+	_ "sar-server/db"
 )
 
 func main() {

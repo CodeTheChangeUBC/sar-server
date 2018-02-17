@@ -7,3 +7,6 @@ sar-server
 # Vim swap & backup files
 *.swp
 *~
+
+# DB files
+*.sqlite
