@@ -1,7 +1,9 @@
 package main
 
 import (
+	"log"
 	"net"
+	"strconv"
 	"time"
 )
 
@@ -27,13 +29,8 @@ func broadcastAnnouncement() {
 		panic(err)
 	}
 
-	addr := net.UDPAddr{
-		IP:   BroadcastIPv4,
-		Port: Port,
-	}
-
 	for {
-		_, err := socket.WriteToUDP([]byte(IdentifierMessage), &addr)
+		_, err = socket.Write([]byte(IdentifierMessage))
 
 		if err != nil {
 			go broadcastAnnouncement()
@@ -42,4 +39,26 @@ func broadcastAnnouncement() {
 
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func server() {
+	listener, err := net.Listen("tcp", "0.0.0.0:"+strconv.FormatInt(int64(Port), 10))
+	if err != nil {
+		panic(err)
+	}
+
+	defer listener.Close()
+
+	for {
+		sock, err := listener.Accept()
+		if err != nil {
+			log.Printf("Error accepting connection: %e", err)
+		}
+
+		go handleClient(sock)
+	}
+}
+
+func handleClient(conn net.Conn) {
+	defer conn.Close()
 }
