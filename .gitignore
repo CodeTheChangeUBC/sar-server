@@ -1,0 +1,9 @@
+# Binaries
+sar-server
+*.o
+*.a
+*.so
+
+# Vim swap & backup files
+*.swp
+*~
