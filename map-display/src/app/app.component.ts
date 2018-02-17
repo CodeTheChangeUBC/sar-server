@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import mapboxgl from 'mapbox-gl';
+
+mapboxgl.accessToken = 'undefined';
 
 @Component({
   selector: 'app-root',
