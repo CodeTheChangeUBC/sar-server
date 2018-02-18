@@ -1,5 +1,7 @@
 package db
 
+import "errors"
+
 const tasksSchema = `
 PRAGMA foreign_keys = ON;
 
@@ -28,6 +30,11 @@ CREATE TABLE assignments (
 COMMIT;
 `
 
+var (
+	// ErrLTZeroUID is returned when the UID for that user is less than zero.
+	ErrLTZeroUID = errors.New("UID was less than zero")
+)
+
 // A Task includes an area to search and additional details.
 type Task struct {
 	ID          int
@@ -45,6 +52,10 @@ func GetUserTasks(user User) ([]Task, error) {
 
 // GetUserIDTasks gets the given user's assigned tasks.
 func GetUserIDTasks(uid int) ([]Task, error) {
+	if uid < 0 {
+		return nil, ErrLTZeroUID
+	}
+
 	taskIDs, err := Database.Query("SELECT task_id FROM assignments WHERE user_id = ?", uid)
 	if err != nil {
 		return nil, err
