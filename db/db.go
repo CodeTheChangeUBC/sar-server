@@ -9,27 +9,32 @@ import (
 )
 
 // Database is the global instance used to access values
-var Database = func() *sql.DB {
-	db, err := OpenDB("./db.sqlite")
+var Database *sql.DB
+
+// InitializeDB runs creates the DB and runs "migrations"
+func InitializeDB(path string) (*sql.DB, error) {
+	db, err := OpenDB(path)
+
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
-	return db
-}()
-
-func init() {
 	var schemas = []string{
 		tasksSchema,
 		usersSchema,
 	}
 
+	// TODO check if schemas have been run and if they have skip execution aka.
+	// Write a migration manager :/
+
 	for _, schema := range schemas {
-		_, err := Database.Exec(schema)
+		_, err := db.Exec(schema)
 		if err != nil {
 			log.Fatalf("Error accessing DB. Please delete and try again or contact CTC. %v", err)
 		}
 	}
+
+	return db, nil
 }
 
 type scanner interface {

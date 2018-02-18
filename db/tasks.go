@@ -15,7 +15,7 @@ CREATE TABLE tasks (
 	area_latitude_start TEXT,
 	area_longitude_start TEXT,
 	area_latitude_end TEXT,
-	area_longitude_end TEXT,
+	area_longitude_end TEXT
 );
 
 CREATE TABLE assignments (
