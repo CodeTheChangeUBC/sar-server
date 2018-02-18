@@ -107,10 +107,6 @@ func GetAllTasks() ([]Task, error) {
 	return tasks, nil
 }
 
-type scanner interface {
-	Scan(args ...interface{}) error
-}
-
 func readTask(sc scanner) (Task, error) {
 	var id int
 	var name string

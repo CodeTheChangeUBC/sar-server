@@ -32,6 +32,10 @@ func init() {
 	}
 }
 
+type scanner interface {
+	Scan(args ...interface{}) error
+}
+
 // OpenDB opens the given database
 func OpenDB(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", path)
