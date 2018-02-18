@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"errors"
 	"log"
 	"net"
 	"strconv"
@@ -20,7 +21,10 @@ const (
 )
 
 // BroadcastIPv4 address.
-var BroadcastIPv4 = net.IPv4(255, 255, 255, 255)
+var (
+	BroadcastIPv4   = net.IPv4(255, 255, 255, 255)
+	ErrInvalidMagic = errors.New("recieved an invalid magic byte")
+)
 
 func broadcastAnnouncement() {
 	socket, err := net.DialUDP("udp4", nil, &net.UDPAddr{
@@ -69,6 +73,15 @@ func handleClient(conn net.Conn) {
 
 	buf := make([]byte, 4096)
 	frame, err := readFrame(conn, buf)
+	if err != nil {
+		// TODO Return error through conn
+		panic(err)
+	}
+
+	if frame.Magic != MagicByte {
+		// TODO Return error through conn
+		panic(ErrInvalidMagic)
+	}
 }
 
 // A Frame for our TCP protocol.
