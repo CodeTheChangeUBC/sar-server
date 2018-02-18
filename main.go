@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -18,6 +19,18 @@ func main() {
 
 	sdb.Database = db
 
+	ctx := context.Background()
+
 	go broadcastAnnouncement()
 	go runServer()
+
+	for {
+		select {
+		case _, ok := <-ctx.Done():
+			if !ok {
+				log.Println("[INFO] Exiting through context")
+				return
+			}
+		}
+	}
 }
