@@ -25,12 +25,9 @@ func main() {
 	go runServer()
 
 	for {
-		select {
-		case _, ok := <-ctx.Done():
-			if !ok {
-				log.Println("[INFO] Exiting through context")
-				return
-			}
+		if _, ok := <-ctx.Done(); !ok {
+			log.Println("[INFO] Exiting through context")
+			return
 		}
 	}
 }

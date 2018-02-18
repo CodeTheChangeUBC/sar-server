@@ -53,6 +53,7 @@ func server() {
 		sock, err := listener.Accept()
 		if err != nil {
 			log.Printf("Error accepting connection: %e", err)
+			continue
 		}
 
 		go handleClient(sock)
