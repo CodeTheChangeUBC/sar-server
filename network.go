@@ -68,7 +68,7 @@ func handleClient(conn net.Conn) {
 	defer conn.Close()
 
 	buf := make([]byte, 4096)
-	frame, err := readFrame(conn)
+	frame, err := readFrame(conn, buf)
 }
 
 // A Frame for our TCP protocol.
