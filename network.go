@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"log"
 	"net"
 	"strconv"
@@ -10,6 +11,9 @@ import (
 const (
 	// Port to connect to.
 	Port int = 6543
+
+	// MagicByte is included in every frame for the TCP protocol
+	MagicByte uint8 = 0x5B
 
 	// IdentifierMessage is the message we broadcast out.
 	IdentifierMessage string = "sarcnc"
@@ -63,5 +67,47 @@ func server() {
 func handleClient(conn net.Conn) {
 	defer conn.Close()
 
-	// TODO "Design" TCP protocol for passing mbTiles
+	buf := make([]byte, 4096)
+	frame, err := readFrame(conn)
+}
+
+// A Frame for our TCP protocol.
+type Frame struct {
+	Magic   byte
+	Length  uint32
+	Payload []byte
+}
+
+// When an error is returned from this function the stream is in an undefined
+// state. It's recommended that an error message be sent and the connection
+// closed.
+func readFrame(conn net.Conn, buf []byte) (Frame, error) {
+	read, err := conn.Read(buf[0:5])
+
+	if read != 5 {
+		panic("Something's rotten in the state of Denmark")
+	} else if err != nil {
+		return Frame{}, err
+	}
+
+	var frame Frame
+
+	frame.Magic = buf[0]
+	frame.Length = binary.LittleEndian.Uint32(buf[1:5])
+
+	// SECURITY PROBLEM. Easy DoS.
+	frame.Payload = make([]byte, frame.Length)
+
+	totalRead := uint32(0)
+
+	for totalRead != frame.Length {
+		read, err := conn.Read(frame.Payload[totalRead:])
+		if err != nil {
+			return Frame{}, err
+		}
+
+		totalRead += read
+	}
+
+	return frame, nil
 }
