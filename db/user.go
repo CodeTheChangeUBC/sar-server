@@ -33,11 +33,7 @@ type User struct {
 
 // GetUserByID gets the given user by its unique ID.
 func GetUserByID(uid int) (User, error) {
-	row, err := Database.QueryRow("SELECT * FROM users WHERE id = ?", uid)
-	if err != nil {
-		return User{}, err
-	}
-
+	row := Database.QueryRow("SELECT * FROM users WHERE id = ?", uid)
 	user, err := readUser(row)
 	if err != nil {
 		return User{}, err
