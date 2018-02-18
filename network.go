@@ -106,7 +106,7 @@ func readFrame(conn net.Conn, buf []byte) (Frame, error) {
 			return Frame{}, err
 		}
 
-		totalRead += read
+		totalRead += uint32(read)
 	}
 
 	return frame, nil
