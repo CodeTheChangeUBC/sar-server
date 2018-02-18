@@ -36,7 +36,44 @@ type Task struct {
 	Status      string
 	StartCorner Point
 	EndCorner   Point
-	AssignedTo  []User
+}
+
+// GetUserTasks gets the given user's assigned tasks.
+func GetUserTasks(user User) ([]Task, error) {
+	return GetUserIDTasks(user.ID)
+}
+
+// GetUserIDTasks gets the given user's assigned tasks.
+func GetUserIDTasks(uid int) ([]Task, error) {
+	taskIDs, err := Database.Query("SELECT task_id FROM assignments WHERE user_id = ?", uid)
+	if err != nil {
+		return nil, err
+	}
+
+	defer taskIDs.Close()
+
+	tasks := make([]Task, 0, 8)
+	for taskIDs.Next() {
+		var id int
+		err = taskIDs.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+
+		row := Database.QueryRow("SELECT * FROM tasks WHERE id = ?", id)
+		if err != nil {
+			return nil, err
+		}
+
+		task, err := readTask(row)
+		if err != nil {
+			return nil, err
+		}
+
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
 }
 
 // GetAllTasks does exactly what its name implies
@@ -49,29 +86,43 @@ func GetAllTasks() ([]Task, error) {
 
 	tasks := make([]Task, 0)
 	for rows.Next() {
-		var id int
-		var name string
-		var details string
-		var status string
-		var laStart string
-		var laEnd string
-		var loStart string
-		var loEnd string
-		err = rows.Scan(&id, &name, &details, &status, &laStart, &loStart, &laEnd, &loEnd)
+		newTask, err := readTask(rows)
 		if err != nil {
 			return nil, err
-		}
-		newTask := Task{
-			ID:          id,
-			Name:        name,
-			Details:     details,
-			Status:      status,
-			StartCorner: Point{Latitude: laStart, Longitude: loStart},
-			EndCorner:   Point{Latitude: laEnd, Longitude: loEnd},
-			AssignedTo:  []User{},
 		}
 		tasks = append(tasks, newTask)
 	}
 
 	return tasks, nil
+}
+
+type scanner interface {
+	Scan(args ...interface{}) error
+}
+
+func readTask(sc scanner) (Task, error) {
+	var id int
+	var name string
+	var details string
+	var status string
+	var laStart string
+	var laEnd string
+	var loStart string
+	var loEnd string
+	err := sc.Scan(&id, &name, &details, &status, &laStart, &loStart, &laEnd, &loEnd)
+
+	if err != nil {
+		return Task{}, err
+	}
+
+	newTask := Task{
+		ID:          id,
+		Name:        name,
+		Details:     details,
+		Status:      status,
+		StartCorner: Point{Latitude: laStart, Longitude: loStart},
+		EndCorner:   Point{Latitude: laEnd, Longitude: loEnd},
+	}
+
+	return newTask, nil
 }

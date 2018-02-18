@@ -26,6 +26,7 @@ COMMIT;
 
 // A User is simply someone with a name.
 type User struct {
+	ID     int
 	Name   string
 	Joined time.Time
 }
