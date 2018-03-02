@@ -104,7 +104,6 @@ func readFrame(conn net.Conn, buf []byte) (Frame, error) {
 	}
 
 	var frame Frame
-
 	frame.Magic = buf[0]
 	frame.Length = binary.LittleEndian.Uint32(buf[1:5])
 
