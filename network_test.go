@@ -9,6 +9,9 @@ import (
 
 // TestReadFrame checks that a frame can be loaded from the network
 func TestReadFrame(t *testing.T) {
+	const sampleText = "some sample text"
+
+	// Create a pipe to test reading a frame.
 	side1, side2 := net.Pipe()
 	defer side1.Close()
 	defer side2.Close()
@@ -17,7 +20,7 @@ func TestReadFrame(t *testing.T) {
 	// actually is looked at after we read a frame it should™ be safe.
 	var sender bytes.Buffer
 	go func() {
-		sender.Write([]byte("some random text"))
+		sender.Write([]byte(sampleText))
 
 		var frameLength [4]byte
 		binary.LittleEndian.PutUint32(frameLength[:], uint32(sender.Len()))
@@ -46,7 +49,7 @@ func TestReadFrame(t *testing.T) {
 		t.Errorf("Failed to verify len. Got: %v. Expected: %v", frame.Length, sender.Len())
 	}
 
-	if "some random text" != string(frame.Payload) {
-		t.Errorf("Failed to verify payload. Got: %s. Expected: %s", string(frame.Payload), "some random text")
+	if sampleText != string(frame.Payload) {
+		t.Errorf("Failed to verify payload. Got: %s. Expected: %s", string(frame.Payload), sampleText)
 	}
 }
